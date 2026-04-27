@@ -1,6 +1,7 @@
 import { readTasksWithUsersByUserId, createTask, type TaskWithUser, type Task, type TaskQueryOptions } from '~/server/utils/taskStorage';
 import { verifyToken, extractTokenFromHeader } from '~/server/utils/jwt';
 import { generateId, getCurrentTimestamp } from '~/server/utils/userStorage';
+import { pushTaskCreatedEvent } from '~/server/utils/task-events';
 
 function getAuthenticatedUserId(event: any): string | null {
   const authorization = getHeader(event, 'authorization');
@@ -91,6 +92,12 @@ export default defineEventHandler(async (event) => {
       body.title.trim(),
       body.description ? body.description.trim() : ''
     );
+
+    try {
+      pushTaskCreatedEvent(newTask);
+    } catch (error) {
+      console.error('Failed to push task created event:', error);
+    }
 
     setResponseStatus(event, 201);
     return {

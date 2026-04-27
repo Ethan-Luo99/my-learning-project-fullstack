@@ -1,6 +1,7 @@
 import { findTaskWithUserById, updateTask, deleteTask, isTaskOwner, type TaskWithUser } from '~/server/utils/taskStorage';
 import { getCurrentTimestamp } from '~/server/utils/userStorage';
 import { verifyToken, extractTokenFromHeader } from '~/server/utils/jwt';
+import { pushTaskUpdatedEvent, pushTaskDeletedEvent } from '~/server/utils/task-events';
 
 function getAuthenticatedUserId(event: any): string | null {
   const authorization = getHeader(event, 'authorization');
@@ -134,6 +135,14 @@ export default defineEventHandler(async (event) => {
 
     const taskWithUser = findTaskWithUserById(taskId);
 
+    if (taskWithUser) {
+      try {
+        pushTaskUpdatedEvent(taskWithUser);
+      } catch (error) {
+        console.error('Failed to push task updated event:', error);
+      }
+    }
+
     return {
       success: true,
       data: taskWithUser
@@ -150,6 +159,12 @@ export default defineEventHandler(async (event) => {
         success: false,
         error: 'Task not found'
       };
+    }
+
+    try {
+      pushTaskDeletedEvent(deletedTask);
+    } catch (error) {
+      console.error('Failed to push task deleted event:', error);
     }
 
     return {

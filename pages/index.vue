@@ -27,6 +27,11 @@
       <WebSocketStatus />
     </div>
 
+    <div class="message-monitor-section" v-if="isAuthenticated">
+      <h3>消息监控</h3>
+      <MessageMonitor />
+    </div>
+
     <div class="api-test">
       <button @click="fetchHello">测试 API 路由</button>
       <p v-if="message">{{ message }}</p>
@@ -127,6 +132,22 @@ p {
 }
 
 .websocket-section h3 {
+  font-size: 1.2rem;
+  color: #333;
+  margin: 0;
+}
+
+.message-monitor-section {
+  margin-top: 2rem;
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.message-monitor-section h3 {
   font-size: 1.2rem;
   color: #333;
   margin: 0;
