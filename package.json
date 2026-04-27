@@ -1,0 +1,38 @@
+{
+  "name": "nuxt3-fullstack-project",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "test:run": "vitest run"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^12.9.0",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.1.1",
+    "nuxt": "^3.13.0",
+    "vue": "latest",
+    "vue-router": "latest",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@nuxt/types": "latest",
+    "@types/bcryptjs": "^3.0.0",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/ws": "^8.5.13",
+    "@vitest/coverage-v8": "^4.1.4",
+    "@vue/test-utils": "^2.4.6",
+    "jsdom": "^29.0.2",
+    "typescript": "latest",
+    "vitest": "^4.1.4"
+  }
+}

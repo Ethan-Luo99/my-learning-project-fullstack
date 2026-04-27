@@ -1,0 +1,23 @@
+[
+  {
+    "id": "mo3tbcw56hyd6qfa87g",
+    "username": "admin",
+    "passwordHash": "$2b$10$BYS4cDL3Q0.s//GSzpKR7.8iUgKpifKJw23XvNiuDxqJcbfePHILO",
+    "avatar": null,
+    "createdAt": "2026-04-18T04:03:43.493Z"
+  },
+  {
+    "id": "mo4cofq0piyjgjxtxu9",
+    "username": "testuser",
+    "passwordHash": "$2b$10$Gax3fosTtW.xje/E.kOkfOR1HUEsnlGIOyJ75PhsaCvJ1FfwHecTy",
+    "avatar": null,
+    "createdAt": "2026-04-18T13:05:46.392Z"
+  },
+  {
+    "id": "mo4kjtnrdpi6fzpjs77",
+    "username": "admin33",
+    "passwordHash": "$2b$10$Z9HvmN9VZgRIWrKl1VjnLO3q2bnWd/aLQENDYEBhI85v/k0Tzg9XS",
+    "avatar": "avatar-mo4kjtnrdpi6fzpjs77-1776531741916-eisdfz8q.jpg",
+    "createdAt": "2026-04-18T16:46:08.104Z"
+  }
+]
