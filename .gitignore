@@ -36,7 +36,11 @@ lerna-debug.log*
 *.db
 *.db-journal
 *.db-wal
+*.db-shm
 server/data/*.db
+server/data/*.db-journal
+server/data/*.db-wal
+server/data/*.db-shm
 
 # Test coverage
 coverage
