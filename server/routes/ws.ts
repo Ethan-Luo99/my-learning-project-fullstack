@@ -1,5 +1,6 @@
 import { defineEventHandler } from 'h3';
 import { initializeWebSocket } from '../utils/websocket';
+import { initializeOfflineMessageDelivery } from '../utils/task-events';
 
 export default defineEventHandler((event) => {
   const nodeRes = event.node.res;
@@ -11,6 +12,7 @@ export default defineEventHandler((event) => {
 
   if (!(server as any).__websocket_initialized) {
     initializeWebSocket(server);
+    initializeOfflineMessageDelivery();
     (server as any).__websocket_initialized = true;
   }
 

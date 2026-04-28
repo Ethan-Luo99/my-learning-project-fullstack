@@ -213,6 +213,8 @@ definePageMeta({
   middleware: ['auth']
 })
 
+const { useTaskEvents } = useRealtimeTasks()
+
 interface TaskUser {
   id: string
   username: string
@@ -257,6 +259,54 @@ const filters = ref({
 const successMessage = ref('')
 const errorMessage = ref('')
 
+interface PendingOperation {
+  taskId?: string
+  action: 'created' | 'updated' | 'deleted'
+  title?: string
+  timestamp: number
+}
+
+const pendingOperations = ref<PendingOperation[]>([])
+const OPERATION_TIMEOUT_MS = 5000
+
+const trackOperation = (operation: Omit<PendingOperation, 'timestamp'>) => {
+  pendingOperations.value.push({
+    ...operation,
+    timestamp: Date.now()
+  })
+}
+
+const consumeMatchingOperation = (
+  taskId: string,
+  action: 'created' | 'updated' | 'deleted',
+  title?: string
+): boolean => {
+  const now = Date.now()
+  
+  pendingOperations.value = pendingOperations.value.filter(
+    op => now - op.timestamp < OPERATION_TIMEOUT_MS
+  )
+  
+  const index = pendingOperations.value.findIndex(op => {
+    if (op.action !== action) return false
+    
+    if (action === 'created') {
+      if (op.taskId && op.taskId === taskId) return true
+      if (op.title && title && op.title === title) return true
+      return false
+    }
+    
+    return op.taskId === taskId
+  })
+  
+  if (index > -1) {
+    pendingOperations.value.splice(index, 1)
+    return true
+  }
+  
+  return false
+}
+
 const showMessage = (type: 'success' | 'error', message: string) => {
   if (type === 'success') {
     successMessage.value = message
@@ -296,6 +346,54 @@ const fetchTasks = async () => {
   }
 }
 
+const handleTaskCreated = (task: TaskSnapshot) => {
+  console.log('[Realtime] Task created:', task)
+  
+  if (consumeMatchingOperation(task.id, 'created', task.title)) {
+    console.log('[Realtime] Ignoring self-created task event:', task.id)
+    return
+  }
+  
+  showMessage('success', `新任务已添加: ${task.title}`)
+  fetchTasks()
+}
+
+const handleTaskUpdated = (task: TaskSnapshot) => {
+  console.log('[Realtime] Task updated:', task)
+  
+  if (consumeMatchingOperation(task.id, 'updated')) {
+    console.log('[Realtime] Ignoring self-updated task event:', task.id)
+    return
+  }
+  
+  const existingTask = tasks.value.find(t => t.id === task.id)
+  if (existingTask) {
+    showMessage('success', `任务已更新: ${task.title}`)
+    fetchTasks()
+  }
+}
+
+const handleTaskDeleted = (taskId: string) => {
+  console.log('[Realtime] Task deleted:', taskId)
+  
+  if (consumeMatchingOperation(taskId, 'deleted')) {
+    console.log('[Realtime] Ignoring self-deleted task event:', taskId)
+    return
+  }
+  
+  const deletedTask = tasks.value.find(t => t.id === taskId)
+  if (deletedTask) {
+    showMessage('success', `任务已删除: ${deletedTask.title}`)
+  }
+  fetchTasks()
+}
+
+useTaskEvents({
+  onTaskCreated: handleTaskCreated,
+  onTaskUpdated: handleTaskUpdated,
+  onTaskDeleted: handleTaskDeleted
+})
+
 onMounted(() => {
   fetchTasks()
 })
@@ -318,6 +416,9 @@ const addTask = async () => {
     return
   }
 
+  const taskTitle = newTask.value.title.trim()
+  trackOperation({ action: 'created', title: taskTitle })
+  
   isAdding.value = true
 
   try {
@@ -330,7 +431,10 @@ const addTask = async () => {
       }
     })
 
-    if (result && (result as { success: boolean }).success) {
+    if (result && (result as { success: boolean; data: any }).success) {
+      const createdTask = (result as { success: boolean; data: any }).data
+      trackOperation({ action: 'created', taskId: createdTask.id })
+      
       newTask.value.title = ''
       newTask.value.description = ''
       await fetchTasks()
@@ -346,6 +450,8 @@ const addTask = async () => {
 }
 
 const toggleTask = async (task: Task) => {
+  trackOperation({ action: 'updated', taskId: task.id })
+  
   try {
     const result = await $fetch(`/api/tasks/${task.id}`, {
       method: 'PUT',
@@ -372,6 +478,8 @@ const deleteTask = async (taskId: string) => {
     return
   }
 
+  trackOperation({ action: 'deleted', taskId })
+  
   isDeleting.value = taskId
 
   try {
@@ -421,6 +529,8 @@ const saveEdit = async () => {
     return
   }
 
+  trackOperation({ action: 'updated', taskId: editingTaskId.value })
+  
   isSavingEdit.value = true
 
   try {

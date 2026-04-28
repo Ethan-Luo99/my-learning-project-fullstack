@@ -14,16 +14,24 @@ export interface WebSocketMessage<T = any> {
   userId?: string;
 }
 
+export interface TaskEventTask {
+  id: string;
+  title: string;
+  description: string;
+  completed: boolean;
+  userId: string;
+  createdAt?: string;
+  updatedAt?: string;
+  user?: {
+    id: string;
+    username: string;
+  };
+}
+
 export interface TaskEventData {
   taskId: string;
   action: 'created' | 'updated' | 'deleted';
-  task?: {
-    id: string;
-    title: string;
-    description: string;
-    completed: boolean;
-    userId: string;
-  };
+  task?: TaskEventTask;
 }
 
 export interface NotificationEventData {
